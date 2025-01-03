@@ -5,6 +5,7 @@ edition = "2021"
 authors = ["Mike Valstar <mike@valstar.dev>"]
 license = "MIT"
 description = "A simple command line bullet list tool"
+homepage = "https://bjourn.com"
 readme = "README.md"
 repository = "https://github.com/mikevalstar/bjourn"
 keywords = ["bullet", "journal", "list", "cli"]
