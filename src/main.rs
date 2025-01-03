@@ -1,11 +1,10 @@
-#[path = "lib/db.rs"] mod db;
+#![allow(dead_code)]
+#![allow(unused_imports)]
+#[path = "lib/db.rs"]
+mod db;
 
 // a list of first arg options enum
-static GLOBAL_ACTIONS: [&str; 3] = [
-    "add",
-    "list",
-    "remove"
-];
+static GLOBAL_ACTIONS: [&str; 3] = ["add", "list", "remove"];
 
 fn main() {
     let mut env_debug = false;
@@ -18,7 +17,7 @@ fn main() {
             }
         }
     }
-    
+
     // read in the arguments
     let args: Vec<String> = std::env::args().collect();
     if env_debug {
@@ -42,21 +41,27 @@ fn main() {
     // if "add" then take everything after the first arg and add it to a single string
     if action == "add" {
         let mut new_bullet = String::new();
-        for i in 2..args.len() {
+        for i in 1..args.len() {
+            if i == 1 && args[i] == "add" {
+                continue;
+            }
             new_bullet.push_str(&args[i]);
             new_bullet.push_str(" ");
         }
         if env_debug {
             println!("Adding: {}", new_bullet);
         }
+
+        if let Err(e) = db::add_bullet(&new_bullet) {
+            println!("Error adding bullet: {}", e);
+            std::process::exit(1);
+        }
     }
 
-    // Create the database if needed 
+    // Create the database if needed
     let dbgo = db::create_database();
     if let Err(e) = dbgo {
         println!("Error creating database: {}", e);
         std::process::exit(1);
     }
-
 }
-
