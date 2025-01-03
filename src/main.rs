@@ -109,7 +109,7 @@ fn main() {
         }
     }
 
-    // handle the "list" action
+    // handle the list action
     if args.action == bargs::BAction::List {
         // read in the date as the second arg (if blank use today)
         let date = match args.input {
