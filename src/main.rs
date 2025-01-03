@@ -2,7 +2,8 @@
 #![allow(unused_imports)]
 #[path = "lib/db.rs"]
 mod db;
-use chrono::prelude;
+use chrono;
+use colored::Colorize;
 use exitcode;
 
 // a list of first arg options enum
@@ -41,7 +42,12 @@ fn main() {
             std::process::exit(1);
         }
         for bullet in list.unwrap() {
-            println!("* {}: {}", bullet.quickid, bullet.text);
+            println!(
+                "{} {}: {}",
+                "*".bold(),
+                bullet.quickid.magenta(),
+                bullet.text
+            );
         }
         std::process::exit(exitcode::OK);
     }
@@ -88,7 +94,12 @@ fn main() {
             std::process::exit(exitcode::IOERR);
         }
         for bullet in list.unwrap() {
-            println!("* {}: {}", bullet.quickid, bullet.text);
+            println!(
+                "{} {}: {}",
+                "*".bold(),
+                bullet.quickid.magenta(),
+                bullet.text
+            );
         }
     }
 
