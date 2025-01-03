@@ -1,4 +1,3 @@
-use chrono;
 use homedir::my_home;
 use nanoid::nanoid;
 use rusqlite::{params, Connection, Result};

@@ -53,10 +53,7 @@ impl BJournRunner for BArgs {
         let flags = HashMap::new();
         let flag_args = HashMap::new();
         let mut action: Option<BAction> = None;
-        let mut input = match input_txt {
-            Some(txt) => Some(txt.trim().to_string()),
-            None => None,
-        };
+        let mut input = input_txt.map(|txt| txt.trim().to_string());
 
         // quick short if nothing supplied
         if args.len() == 1 && input.is_none() {
@@ -119,7 +116,7 @@ impl BJournRunner for BArgs {
                 input = Some(arg.clone());
             } else {
                 let mut new_input = input.unwrap();
-                new_input.push_str(" ");
+                new_input.push(' ');
                 new_input.push_str(arg);
                 input = Some(new_input);
             }
@@ -153,7 +150,7 @@ pub fn parse_args() -> BArgs {
         for line in stdin.lines() {
             let line = line.unwrap();
             input_buffer.push_str(&line);
-            input_buffer.push_str("\n");
+            input_buffer.push('\n');
         }
     }
 
@@ -162,8 +159,7 @@ pub fn parse_args() -> BArgs {
         return args;
     }
 
-    let args = BArgs::parse(args_input, None);
-    return args;
+    BArgs::parse(args_input, None)
 }
 
 #[cfg(test)]
@@ -183,7 +179,7 @@ mod tests {
             get_action_from_flag("remove"),
             Some(BAction::Remove)
         ));
-        assert!(matches!(get_action_from_flag("invalid"), None));
+        assert!(get_action_from_flag("invalid").is_none());
     }
 
     #[test]

@@ -6,9 +6,7 @@ mod bargs;
 #[path = "lib/db.rs"]
 mod db;
 
-use chrono;
 use colored::Colorize;
-use exitcode;
 use std::io::IsTerminal;
 
 // a list of first arg options enum
@@ -51,7 +49,7 @@ fn main() {
                 "bjourn".bold(),
                 "[action] [args]".bold().italic()
             );
-            println!("");
+            println!();
             println!(
                 "\t{} {}",
                 "bjourn list".bold(),
@@ -59,17 +57,17 @@ fn main() {
             );
             println!("\t{}", "bjourn add my entry here".bold());
             println!("\t{}", "bjourn remove ZScG1V3i".bold());
-            println!("");
+            println!();
             println!("Actions: {}", "add, list, remove".bold().italic());
             /*println!(
                 "\t{} {}",
                 "bjourn help".bold(),
                 "- prints this help".italic()
             );*/
-            println!("");
+            println!();
 
             println!("Your journal for today: {}", today.bold());
-            println!("");
+            println!();
         }
 
         let list = db::list_bullets(today);
@@ -87,7 +85,7 @@ fn main() {
                 );
             } else {
                 // for piping output
-                println!("{} {}", "*", bullet.text);
+                println!("* {}", bullet.text);
             }
         }
 
@@ -108,7 +106,7 @@ fn main() {
             println!("Adding: {}", input);
         }
 
-        if let Err(e) = db::add_bullet(&input) {
+        if let Err(e) = db::add_bullet(input) {
             eprintln!("Error adding bullet: {}", e);
             std::process::exit(exitcode::IOERR);
         }
@@ -137,7 +135,7 @@ fn main() {
                 );
             } else {
                 // for piping output
-                println!("{} {}", "*", bullet.text);
+                println!("* {}", bullet.text);
             }
         }
     }
