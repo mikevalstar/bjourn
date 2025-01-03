@@ -2,6 +2,7 @@
 #![allow(unused_imports)]
 #[path = "lib/db.rs"]
 mod db;
+use chrono::prelude;
 
 // a list of first arg options enum
 static GLOBAL_ACTIONS: [&str; 3] = ["add", "list", "remove"];
@@ -26,9 +27,15 @@ fn main() {
 
     // if 0 args, print help
     if args.len() == 1 {
-        // TODO just print out the day's list of bullet items
-        println!("Say something!");
-        std::process::exit(1);
+        let list = db::list_bullets(&chrono::Local::now().format("%Y-%m-%d").to_string());
+        if let Err(e) = list {
+            println!("Error listing bullets: {}", e);
+            std::process::exit(1);
+        }
+        for bullet in list.unwrap() {
+            println!("{}: {}", bullet.quickid, bullet.text);
+        }
+        std::process::exit(0);
     }
 
     // check if the first arg is a valid action or we default to "add"
@@ -55,6 +62,25 @@ fn main() {
         if let Err(e) = db::add_bullet(&new_bullet) {
             println!("Error adding bullet: {}", e);
             std::process::exit(1);
+        }
+    }
+
+    // hanlde the "list" action
+    if action == "list" {
+        // read in the date as the second arg (if blank use today)
+        let date = if args.len() > 2 {
+            &args[2]
+        } else {
+            &chrono::Local::now().format("%Y-%m-%d").to_string()
+        };
+
+        let list = db::list_bullets(date);
+        if let Err(e) = list {
+            println!("Error listing bullets: {}", e);
+            std::process::exit(1);
+        }
+        for bullet in list.unwrap() {
+            println!("{}: {}", bullet.quickid, bullet.text);
         }
     }
 

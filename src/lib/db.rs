@@ -10,6 +10,41 @@ static ALPHABET: [char; 62] = [
     '5', '6', '7', '8', '9',
 ];
 
+#[derive(Debug)]
+pub struct BItem {
+    pub id: i32,
+    pub quickid: String,
+    pub added: String,
+    pub list_date: String,
+    pub text: String,
+}
+
+// Lists the bullets for a given day
+pub fn list_bullets(date: &str) -> Result<Vec<BItem>> {
+    let db_path = database_location();
+    let conn = Connection::open(db_path)?;
+
+    let mut stmt =
+        conn.prepare("SELECT id, quickid, text, list_date, added FROM blist WHERE list_date = ?1")?;
+    let bullet_iter = stmt.query_map(params![date], |row| {
+        Ok(BItem {
+            id: row.get(0)?,
+            quickid: row.get(1)?,
+            added: row.get(4)?,
+            list_date: row.get(3)?,
+            text: row.get(2)?,
+        })
+    })?;
+
+    let mut bullets = Vec::new();
+    for bullet in bullet_iter {
+        bullets.push(bullet?);
+    }
+
+    Ok(bullets)
+}
+
+// Adds a bullt with a random nano id
 pub fn add_bullet(text: &String) -> Result<()> {
     let db_path = database_location();
     let conn = Connection::open(db_path)?;
@@ -27,6 +62,7 @@ pub fn add_bullet(text: &String) -> Result<()> {
     Ok(())
 }
 
+// Creates and sets up the DB schema
 pub fn create_database() -> Result<()> {
     let db_path = database_location();
 

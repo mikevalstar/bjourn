@@ -12,6 +12,18 @@ Add a new bullet point to the list
 blist add This is a new bullet point
 ```
 
+### List
+
+You can view the day's bullet points by specifying the day or view today's bullet points without specifying a day.
+
+```bash
+blist
+```
+
+```bash
+blist list 2025-01-01
+```
+
 ## Development Notes
 
 Run:
