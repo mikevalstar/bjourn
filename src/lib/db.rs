@@ -128,5 +128,5 @@ pub fn database_location() -> String {
         }
     }
 
-    return db_path;
+    db_path
 }
