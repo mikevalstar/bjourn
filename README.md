@@ -1,4 +1,4 @@
-# blist
+# bjourn
 
 A commnd line Bullet List tool
 
@@ -9,7 +9,7 @@ A commnd line Bullet List tool
 Add a new bullet point to the list
 
 ```bash
-blist add This is a new bullet point
+bjourn add This is a new bullet point
 ```
 
 ### List
@@ -17,11 +17,11 @@ blist add This is a new bullet point
 You can view the day's bullet points by specifying the day or view today's bullet points without specifying a day.
 
 ```bash
-blist
+bjourn
 ```
 
 ```bash
-blist list 2025-01-01
+bjourn list 2025-01-01
 ```
 
 ## Development Notes
@@ -42,4 +42,10 @@ Debug Mode
 
 ```bash
 DEBUG=true cargo run
+```
+
+## Installation (Local)
+
+```bash
+cargo install --path .
 ```

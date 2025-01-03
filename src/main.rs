@@ -3,6 +3,7 @@
 #[path = "lib/db.rs"]
 mod db;
 use chrono::prelude;
+use exitcode;
 
 // a list of first arg options enum
 static GLOBAL_ACTIONS: [&str; 3] = ["add", "list", "remove"];
@@ -29,7 +30,7 @@ fn main() {
     let dbgo = db::create_database();
     if let Err(e) = dbgo {
         println!("Error creating database: {}", e);
-        std::process::exit(1);
+        std::process::exit(exitcode::CANTCREAT);
     }
 
     // if 0 args, print help
@@ -42,7 +43,7 @@ fn main() {
         for bullet in list.unwrap() {
             println!("* {}: {}", bullet.quickid, bullet.text);
         }
-        std::process::exit(0);
+        std::process::exit(exitcode::OK);
     }
 
     // check if the first arg is a valid action or we default to "add"
@@ -68,7 +69,7 @@ fn main() {
 
         if let Err(e) = db::add_bullet(&new_bullet) {
             println!("Error adding bullet: {}", e);
-            std::process::exit(1);
+            std::process::exit(exitcode::IOERR);
         }
     }
 
@@ -84,7 +85,7 @@ fn main() {
         let list = db::list_bullets(date);
         if let Err(e) = list {
             println!("Error listing bullets: {}", e);
-            std::process::exit(1);
+            std::process::exit(exitcode::IOERR);
         }
         for bullet in list.unwrap() {
             println!("* {}: {}", bullet.quickid, bullet.text);
@@ -95,7 +96,7 @@ fn main() {
     if action == "remove" {
         if args.len() < 3 {
             println!("Error: remove requires a quickid");
-            std::process::exit(1);
+            std::process::exit(exitcode::USAGE);
         }
         let quickid = &args[2];
         if env_debug {
@@ -104,7 +105,9 @@ fn main() {
 
         if let Err(e) = db::remove_bullet(quickid) {
             println!("Error removing bullet: {}", e);
-            std::process::exit(1);
+            std::process::exit(exitcode::IOERR);
         }
     }
+
+    std::process::exit(exitcode::OK);
 }
