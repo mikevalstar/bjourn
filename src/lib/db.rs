@@ -1,4 +1,3 @@
-use chrono;
 use homedir::my_home;
 use nanoid::nanoid;
 use rusqlite::{params, Connection, Result};
@@ -129,5 +128,5 @@ pub fn database_location() -> String {
         }
     }
 
-    return db_path;
+    db_path
 }
