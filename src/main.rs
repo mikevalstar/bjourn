@@ -25,6 +25,13 @@ fn main() {
         dbg!(&args);
     }
 
+    // Create the database if needed before exercising the actions
+    let dbgo = db::create_database();
+    if let Err(e) = dbgo {
+        println!("Error creating database: {}", e);
+        std::process::exit(1);
+    }
+
     // if 0 args, print help
     if args.len() == 1 {
         let list = db::list_bullets(&chrono::Local::now().format("%Y-%m-%d").to_string());
@@ -33,7 +40,7 @@ fn main() {
             std::process::exit(1);
         }
         for bullet in list.unwrap() {
-            println!("{}: {}", bullet.quickid, bullet.text);
+            println!("* {}: {}", bullet.quickid, bullet.text);
         }
         std::process::exit(0);
     }
@@ -65,7 +72,7 @@ fn main() {
         }
     }
 
-    // hanlde the "list" action
+    // handle the "list" action
     if action == "list" {
         // read in the date as the second arg (if blank use today)
         let date = if args.len() > 2 {
@@ -80,14 +87,24 @@ fn main() {
             std::process::exit(1);
         }
         for bullet in list.unwrap() {
-            println!("{}: {}", bullet.quickid, bullet.text);
+            println!("* {}: {}", bullet.quickid, bullet.text);
         }
     }
 
-    // Create the database if needed
-    let dbgo = db::create_database();
-    if let Err(e) = dbgo {
-        println!("Error creating database: {}", e);
-        std::process::exit(1);
+    // remove
+    if action == "remove" {
+        if args.len() < 3 {
+            println!("Error: remove requires a quickid");
+            std::process::exit(1);
+        }
+        let quickid = &args[2];
+        if env_debug {
+            println!("Removing: {}", quickid);
+        }
+
+        if let Err(e) = db::remove_bullet(quickid) {
+            println!("Error removing bullet: {}", e);
+            std::process::exit(1);
+        }
     }
 }

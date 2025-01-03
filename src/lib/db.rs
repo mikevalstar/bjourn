@@ -62,6 +62,16 @@ pub fn add_bullet(text: &String) -> Result<()> {
     Ok(())
 }
 
+// remove a bullet item based on quickid
+pub fn remove_bullet(quickid: &String) -> Result<()> {
+    let db_path = database_location();
+    let conn = Connection::open(db_path)?;
+
+    conn.execute("DELETE FROM blist WHERE quickid = ?1", params![quickid])?;
+
+    Ok(())
+}
+
 // Creates and sets up the DB schema
 pub fn create_database() -> Result<()> {
     let db_path = database_location();
