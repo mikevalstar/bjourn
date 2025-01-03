@@ -78,12 +78,17 @@ fn main() {
             std::process::exit(1);
         }
         for bullet in list.unwrap() {
-            println!(
-                "{} {}: {}",
-                "*".bold(),
-                bullet.quickid.magenta(),
-                bullet.text
-            );
+            if std::io::stdout().is_terminal() {
+                println!(
+                    "{} {}: {}",
+                    "*".bold(),
+                    bullet.quickid.magenta(),
+                    bullet.text
+                );
+            } else {
+                // for piping output
+                println!("{} {}", "*", bullet.text);
+            }
         }
 
         std::process::exit(exitcode::OK);
@@ -123,12 +128,17 @@ fn main() {
             std::process::exit(exitcode::IOERR);
         }
         for bullet in list.unwrap() {
-            println!(
-                "{} {}: {}",
-                "*".bold(),
-                bullet.quickid.magenta(),
-                bullet.text
-            );
+            if std::io::stdout().is_terminal() {
+                println!(
+                    "{} {}: {}",
+                    "*".bold(),
+                    bullet.quickid.magenta(),
+                    bullet.text
+                );
+            } else {
+                // for piping output
+                println!("{} {}", "*", bullet.text);
+            }
         }
     }
 
