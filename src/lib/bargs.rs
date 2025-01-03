@@ -2,6 +2,7 @@
 use phf::phf_map;
 use std::collections::HashMap;
 use std::io;
+use std::io::IsTerminal;
 use std::matches;
 
 // Actions
@@ -9,6 +10,7 @@ use std::matches;
 pub enum BAction {
     Add,
     List,
+    ListDefault, // when it's just the default no args passed
     Remove,
 }
 // a list of first arg options enum
@@ -32,7 +34,7 @@ fn get_action_from_flag(flag: &str) -> Option<BAction> {
 }
 
 pub trait BJournRunner {
-    fn parse(args: Vec<String>) -> Self;
+    fn parse(args: Vec<String>, input_txt: Option<String>) -> Self;
     fn has_flag(&self, flag: &str) -> bool;
     fn flag_arg(&self, flag: &str) -> Option<String>;
 }
@@ -40,31 +42,27 @@ pub trait BJournRunner {
 #[derive(Debug)]
 pub struct BArgs {
     args: Vec<String>,
-    action: BAction,
+    pub action: BAction,
     flags: HashMap<String, String>,
     flag_args: HashMap<String, String>,
-    input: Option<String>,
+    pub input: Option<String>,
 }
 
 impl BJournRunner for BArgs {
-    fn parse(args: Vec<String>) -> Self {
+    fn parse(args: Vec<String>, input_txt: Option<String>) -> Self {
         let flags = HashMap::new();
         let flag_args = HashMap::new();
         let mut action: Option<BAction> = None;
-        let mut input = None;
-
-        // take standrad in for piped add
-        let mut input_buffer = String::new();
-        for line in io::stdin().lines() {
-            input_buffer.push_str(&line.unwrap());
-            input_buffer.push_str("\n");
-        }
+        let mut input = match input_txt {
+            Some(txt) => Some(txt.trim().to_string()),
+            None => None,
+        };
 
         // quick short if nothing supplied
         if args.len() == 1 && input.is_none() {
             return BArgs {
                 args,
-                action: BAction::List,
+                action: BAction::ListDefault,
                 flags,
                 flag_args,
                 input,
@@ -147,7 +145,24 @@ impl BJournRunner for BArgs {
 
 pub fn parse_args() -> BArgs {
     let args_input: Vec<String> = std::env::args().collect();
-    let args = BArgs::parse(args_input);
+
+    let mut input_buffer = String::new();
+
+    if !std::io::stdin().is_terminal() {
+        let stdin = io::stdin();
+        for line in stdin.lines() {
+            let line = line.unwrap();
+            input_buffer.push_str(&line);
+            input_buffer.push_str("\n");
+        }
+    }
+
+    if !input_buffer.trim().is_empty() {
+        let args = BArgs::parse(args_input, Some(input_buffer));
+        return args;
+    }
+
+    let args = BArgs::parse(args_input, None);
     return args;
 }
 
@@ -173,51 +188,73 @@ mod tests {
 
     #[test]
     fn test_add_command_variants() {
-        let args1 = BArgs::parse(vec![
-            "bjourn".to_string(),
-            "add".to_string(),
-            "this".to_string(),
-            "is".to_string(),
-            "a".to_string(),
-            "test".to_string(),
-        ]);
+        let args1 = BArgs::parse(
+            vec![
+                "bjourn".to_string(),
+                "add".to_string(),
+                "this".to_string(),
+                "is".to_string(),
+                "a".to_string(),
+                "test".to_string(),
+            ],
+            None,
+        );
         assert!(matches!(args1.action, BAction::Add));
         assert_eq!(args1.input.unwrap(), "this is a test");
 
-        let args2 = BArgs::parse(vec![
-            "bjourn".to_string(),
-            "this".to_string(),
-            "is".to_string(),
-            "a".to_string(),
-            "test".to_string(),
-        ]);
+        let args2 = BArgs::parse(
+            vec![
+                "bjourn".to_string(),
+                "this".to_string(),
+                "is".to_string(),
+                "a".to_string(),
+                "test".to_string(),
+            ],
+            None,
+        );
         assert!(matches!(args2.action, BAction::Add));
         assert_eq!(args2.input.unwrap(), "this is a test");
 
-        let args3 = BArgs::parse(vec![
-            "bjourn".to_string(),
-            "--add".to_string(),
-            "this".to_string(),
-            "is".to_string(),
-            "a".to_string(),
-            "test".to_string(),
-        ]);
+        let args3 = BArgs::parse(
+            vec![
+                "bjourn".to_string(),
+                "--add".to_string(),
+                "this".to_string(),
+                "is".to_string(),
+                "a".to_string(),
+                "test".to_string(),
+            ],
+            None,
+        );
         assert!(matches!(args3.action, BAction::Add));
         assert_eq!(args3.input.unwrap(), "this is a test");
 
-        let args4 = BArgs::parse(vec![
-            "bjourn".to_string(),
-            "-a".to_string(),
-            "this".to_string(),
-            "is".to_string(),
-            "a".to_string(),
-            "test".to_string(),
-        ]);
+        let args4 = BArgs::parse(
+            vec![
+                "bjourn".to_string(),
+                "-a".to_string(),
+                "this".to_string(),
+                "is".to_string(),
+                "a".to_string(),
+                "test".to_string(),
+            ],
+            None,
+        );
         assert!(matches!(args4.action, BAction::Add));
         assert_eq!(args4.input.unwrap(), "this is a test");
 
-        let args5 = BArgs::parse(vec!["bjourn".to_string(), "this is a test".to_string()]);
+        let args5 = BArgs::parse(
+            vec!["bjourn".to_string(), "this is a test".to_string()],
+            None,
+        );
         assert!(matches!(args5.action, BAction::Add));
         assert_eq!(args5.input.unwrap(), "this is a test");
+
+        let args6 = BArgs::parse(
+            vec!["bjourn".to_string(), "this".to_string(), "is".to_string()],
+            Some("This is stdin input".to_string()),
+        );
+        assert!(matches!(args6.action, BAction::Add));
+        assert_eq!(args6.input.unwrap(), "This is stdin input this is"); // appends teh text
     }
 }
