@@ -2,7 +2,7 @@
 #![allow(unused_imports)]
 #[path = "lib/db.rs"]
 mod db;
-use chrono::prelude;
+use chrono;
 use exitcode;
 
 // a list of first arg options enum
