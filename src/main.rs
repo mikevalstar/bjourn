@@ -1,7 +1,10 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
+#[path = "lib/bargs.rs"]
+mod bargs;
 #[path = "lib/db.rs"]
 mod db;
+
 use chrono;
 use colored::Colorize;
 use exitcode;
@@ -30,13 +33,41 @@ fn main() {
     // Create the database if needed before exercising the actions
     let dbgo = db::create_database();
     if let Err(e) = dbgo {
-        println!("Error creating database: {}", e);
+        eprintln!("Error creating database: {}", e);
         std::process::exit(exitcode::CANTCREAT);
     }
 
     // if 0 args, print help
     if args.len() == 1 {
-        let list = db::list_bullets(&chrono::Local::now().format("%Y-%m-%d").to_string());
+        // print out some usage info before the list
+        println!("Usage:");
+        println!(
+            "\t{} {}",
+            "bjourn".bold(),
+            "[action] [args]".bold().italic()
+        );
+        println!("");
+        println!(
+            "\t{} {}",
+            "bjourn list".bold(),
+            "[optional date]".bold().italic()
+        );
+        println!("\t{}", "bjourn add my entry here".bold());
+        println!("\t{}", "bjourn remove ZScG1V3i".bold());
+        println!("");
+        println!("Actions: {}", "add, list, remove".bold().italic());
+        /*println!(
+            "\t{} {}",
+            "bjourn help".bold(),
+            "- prints this help".italic()
+        );*/
+        println!("");
+
+        let today = &chrono::Local::now().format("%Y-%m-%d").to_string();
+        println!("Your journal for today: {}", today.bold());
+        println!("");
+
+        let list = db::list_bullets(today);
         if let Err(e) = list {
             println!("Error listing bullets: {}", e);
             std::process::exit(1);
@@ -49,6 +80,7 @@ fn main() {
                 bullet.text
             );
         }
+
         std::process::exit(exitcode::OK);
     }
 
@@ -74,7 +106,7 @@ fn main() {
         }
 
         if let Err(e) = db::add_bullet(&new_bullet) {
-            println!("Error adding bullet: {}", e);
+            eprintln!("Error adding bullet: {}", e);
             std::process::exit(exitcode::IOERR);
         }
     }
@@ -90,7 +122,7 @@ fn main() {
 
         let list = db::list_bullets(date);
         if let Err(e) = list {
-            println!("Error listing bullets: {}", e);
+            eprintln!("Error listing bullets: {}", e);
             std::process::exit(exitcode::IOERR);
         }
         for bullet in list.unwrap() {
@@ -106,7 +138,7 @@ fn main() {
     // remove
     if action == "remove" {
         if args.len() < 3 {
-            println!("Error: remove requires a quickid");
+            eprintln!("Error: remove requires a quickid");
             std::process::exit(exitcode::USAGE);
         }
         let quickid = &args[2];
@@ -115,7 +147,7 @@ fn main() {
         }
 
         if let Err(e) = db::remove_bullet(quickid) {
-            println!("Error removing bullet: {}", e);
+            eprintln!("Error removing bullet: {}", e);
             std::process::exit(exitcode::IOERR);
         }
     }
