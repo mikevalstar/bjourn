@@ -9,6 +9,9 @@ mod db;
 #[path = "lib/displayinfo.rs"]
 mod displayinfo;
 
+#[path = "lib/displaylist.rs"]
+mod displaylist;
+
 use colored::Colorize;
 use std::io::IsTerminal;
 
@@ -17,10 +20,18 @@ static GLOBAL_ACTIONS: [&str; 3] = ["add", "list", "remove"];
 
 fn main() {
     let mut env_debug = false;
+    let mut supress_usage = false;
+
+    if std::env::var("BJOURN_USAGE").is_ok() {
+        let usage = std::env::var("BJOURN_USAGE").unwrap();
+        if usage == "false" || usage == "0" {
+            supress_usage = true;
+        }
+    }
 
     if std::env::var("DEBUG").is_ok() {
         if let Ok(val) = std::env::var("DEBUG") {
-            if val == "true" {
+            if val == "true" || val == "1" {
                 println!("Debug mode is enabled");
                 env_debug = true;
             }
@@ -53,30 +64,15 @@ fn main() {
 
         if std::io::stdout().is_terminal() {
             // print out some usage info before the list, but only if it's a terminal
-            displayinfo::usage();
+            if !supress_usage {
+                displayinfo::usage();
+            }
 
             println!("Your journal for today: {}", today.bold());
             println!();
         }
 
-        let list = db::list_bullets(today);
-        if let Err(e) = list {
-            println!("Error listing bullets: {}", e);
-            std::process::exit(1);
-        }
-        for bullet in list.unwrap() {
-            if std::io::stdout().is_terminal() {
-                println!(
-                    "{} {}: {}",
-                    "*".bold(),
-                    bullet.quickid.magenta(),
-                    bullet.text
-                );
-            } else {
-                // for piping output
-                println!("* {}", bullet.text);
-            }
-        }
+        displaylist::displaylist(&args);
 
         std::process::exit(exitcode::OK);
     }
@@ -129,30 +125,7 @@ fn main() {
 
     // handle the list action
     if args.action == bargs::BAction::List {
-        // read in the date as the second arg (if blank use today)
-        let date = match args.input {
-            Some(ref d) => d,
-            None => &chrono::Local::now().format("%Y-%m-%d").to_string(),
-        };
-
-        let list = db::list_bullets(date);
-        if let Err(e) = list {
-            eprintln!("Error listing bullets: {}", e);
-            std::process::exit(exitcode::IOERR);
-        }
-        for bullet in list.unwrap() {
-            if std::io::stdout().is_terminal() {
-                println!(
-                    "{} {}: {}",
-                    "*".bold(),
-                    bullet.quickid.magenta(),
-                    bullet.text
-                );
-            } else {
-                // for piping output
-                println!("* {}", bullet.text);
-            }
-        }
+        displaylist::displaylist(&args);
     }
 
     std::process::exit(exitcode::OK);
