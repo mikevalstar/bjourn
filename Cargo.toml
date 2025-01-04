@@ -1,6 +1,6 @@
 [package]
 name = "bjourn"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 authors = ["Mike Valstar <mike@valstar.dev>"]
 license = "MIT"
@@ -19,7 +19,6 @@ chrono = "0.4.39"
 exitcode = "1.1.2"
 colored = "2.2.0"
 phf = { version = "0.11", features = ["macros"] }
-man = "0.3.0"
 
 [dev-dependencies]
 assert_cmd = "2.0.16"
