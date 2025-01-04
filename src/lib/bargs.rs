@@ -16,7 +16,7 @@ pub enum BAction {
     Version,
 }
 // a list of first arg options enum
-static GLOBAL_ACTIONS: [&str; 3] = ["add", "list", "remove"];
+static GLOBAL_ACTIONS: [&str; 5] = ["add", "list", "remove", "help", "version"];
 
 // flag map to actions
 static GLOBAL_ACTION_ARGS_MAP: phf::Map<&'static str, BAction> = phf_map! {
@@ -40,6 +40,19 @@ fn get_action_from_flag(flag: &str) -> Option<BAction> {
     GLOBAL_ACTION_ARGS_MAP.get(flag).cloned()
 }
 
+// flags map to options flag and wether or not it takes an argument
+static GLOBAL_ACTION_FLAGS_MAP: phf::Map<&'static str, (&'static str, bool)> = phf_map! {
+    "o" => ("output", true),
+    "output" => ("output", true),
+};
+
+fn get_flag_from_flag(flag: &str) -> Option<(&str, bool)> {
+    if !GLOBAL_ACTION_FLAGS_MAP.contains_key(flag) {
+        return None;
+    }
+    GLOBAL_ACTION_FLAGS_MAP.get(flag).cloned()
+}
+
 pub trait BJournRunner {
     fn parse(args: Vec<String>, input_txt: Option<String>) -> Self;
     fn has_flag(&self, flag: &str) -> bool;
@@ -50,15 +63,15 @@ pub trait BJournRunner {
 pub struct BArgs {
     args: Vec<String>,
     pub action: BAction,
-    flags: HashMap<String, String>,
-    flag_args: HashMap<String, String>,
+    pub flags: HashMap<String, bool>,
+    pub flag_args: HashMap<String, String>,
     pub input: Option<String>,
 }
 
 impl BJournRunner for BArgs {
     fn parse(args: Vec<String>, input_txt: Option<String>) -> Self {
-        let flags = HashMap::new();
-        let flag_args = HashMap::new();
+        let mut flags: HashMap<String, bool> = HashMap::new();
+        let mut flag_args = HashMap::new();
         let mut action: Option<BAction> = None;
         let mut input = input_txt.map(|txt| txt.trim().to_string());
 
@@ -73,9 +86,16 @@ impl BJournRunner for BArgs {
             };
         }
 
+        let mut skip_next = false;
         for (i, arg) in args.iter().enumerate() {
             // skip the first arg as it is the program name
             if i == 0 {
+                continue;
+            }
+
+            // skip next arg
+            if skip_next {
+                skip_next = false;
                 continue;
             }
 
@@ -83,10 +103,30 @@ impl BJournRunner for BArgs {
             if arg.starts_with("--") && !arg.contains(' ') {
                 // check the flag is valid, otherwise print a warning
                 // we check for the space in case someone has added dashes in their note at the beginning
+                let mut ffound = false;
                 let flag = arg.replace("--", "");
                 if let Some(a) = get_action_from_flag(&flag) {
                     action = Some(a);
-                } else {
+                    ffound = true;
+                }
+                if let Some((flag_item, takes_arg)) = get_flag_from_flag(&flag) {
+                    if takes_arg {
+                        if i < args.len() {
+                            let next_arg = &args[i + 1];
+                            if !next_arg.starts_with("-") {
+                                flag_args.insert(flag_item.to_string(), next_arg.to_string());
+                                skip_next = true;
+                            } else {
+                                eprintln!("Warning: Flag {} requires an argument", flag);
+                            }
+                        }
+                    } else {
+                        flags.insert(flag_item.to_string(), true);
+                    }
+                    ffound = true;
+                }
+
+                if !ffound {
                     eprintln!("Warning: Unknown flag: {}", flag);
                 }
 
@@ -94,10 +134,33 @@ impl BJournRunner for BArgs {
             } else if arg.starts_with("-") && !arg.contains(' ') {
                 let flag = arg.replace("-", "");
                 // each character is a flag to set
-                for c in flag.chars() {
+                for (x, c) in flag.chars().enumerate() {
+                    let mut ffound = false;
                     if let Some(a) = get_action_from_flag(&c.to_string()) {
                         action = Some(a);
-                    } else {
+                    }
+
+                    if let Some((flag_item, takes_arg)) = get_flag_from_flag(&c.to_string()) {
+                        // only the last arg can have input
+                        if takes_arg && x + 1 == flag.chars().count() {
+                            if i < args.len() {
+                                let next_arg = &args[i + 1];
+                                if !next_arg.starts_with("-") {
+                                    flag_args.insert(flag_item.to_string(), next_arg.to_string());
+                                    skip_next = true;
+                                } else {
+                                    eprintln!("Warning: Flag {} requires an argument", flag);
+                                }
+                            }
+                        } else if takes_arg {
+                            eprintln!("Warning: Flag {} requires an argument, so must be the last argument in the list {} {}", flag, x, flag.chars().count());
+                        } else {
+                            flags.insert(flag_item.to_string(), true);
+                        }
+                        ffound = true;
+                    }
+
+                    if !ffound {
                         eprintln!("Warning: Unknown flag: {}", c);
                     }
                 }

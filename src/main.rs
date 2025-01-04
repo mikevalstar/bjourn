@@ -17,10 +17,18 @@ static GLOBAL_ACTIONS: [&str; 3] = ["add", "list", "remove"];
 
 fn main() {
     let mut env_debug = false;
+    let mut supress_usage = false;
+
+    if std::env::var("BJOURN_USAGE").is_ok() {
+        let usage = std::env::var("BJOURN_USAGE").unwrap();
+        if usage == "false" || usage == "0" {
+            supress_usage = true;
+        }
+    }
 
     if std::env::var("DEBUG").is_ok() {
         if let Ok(val) = std::env::var("DEBUG") {
-            if val == "true" {
+            if val == "true" || val == "1" {
                 println!("Debug mode is enabled");
                 env_debug = true;
             }
@@ -53,7 +61,9 @@ fn main() {
 
         if std::io::stdout().is_terminal() {
             // print out some usage info before the list, but only if it's a terminal
-            displayinfo::usage();
+            if !supress_usage {
+                displayinfo::usage();
+            }
 
             println!("Your journal for today: {}", today.bold());
             println!();

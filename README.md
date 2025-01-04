@@ -59,6 +59,16 @@ bjourn
 bjourn list 2025-01-01
 ```
 
+When piping to another command, the output is formatted as a simple list of bullet points
+
+```bash
+bjourn list 2025-01-01 | pbcopy
+
+bjourn list | cat
+* woke up and had breakfast
+* added version 0.2.1 of bjourn
+```
+
 ## Development Notes
 
 Run:
@@ -78,6 +88,11 @@ Debug Mode
 ```bash
 DEBUG=true cargo run
 ```
+
+## ENV variables
+
+`DEBUG` - Set to `true` to print debug messages
+`BJOURN_USAGE` - Set to `false` to print the usage message when running bjourn with no arguments
 
 ## Installation (Local)
 
