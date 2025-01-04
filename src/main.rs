@@ -6,6 +6,9 @@ mod bargs;
 #[path = "lib/db.rs"]
 mod db;
 
+#[path = "lib/displayinfo.rs"]
+mod displayinfo;
+
 use colored::Colorize;
 use std::io::IsTerminal;
 
@@ -37,34 +40,20 @@ fn main() {
         std::process::exit(exitcode::CANTCREAT);
     }
 
-    // if 0 args, print help
+    // version
+    // TODO: move as a modifier so we can keep going
+    if args.action == bargs::BAction::Version {
+        displayinfo::version();
+        std::process::exit(exitcode::OK);
+    }
+
+    // if 0 args, print totday with a breif usage details
     if args.action == bargs::BAction::ListDefault {
         let today = &chrono::Local::now().format("%Y-%m-%d").to_string();
 
         if std::io::stdout().is_terminal() {
             // print out some usage info before the list, but only if it's a terminal
-            println!("Usage:");
-            println!(
-                "\t{} {}",
-                "bjourn".bold(),
-                "[action] [args]".bold().italic()
-            );
-            println!();
-            println!(
-                "\t{} {}",
-                "bjourn list".bold(),
-                "[optional date]".bold().italic()
-            );
-            println!("\t{}", "bjourn add my entry here".bold());
-            println!("\t{}", "bjourn remove ZScG1V3i".bold());
-            println!();
-            println!("Actions: {}", "add, list, remove".bold().italic());
-            /*println!(
-                "\t{} {}",
-                "bjourn help".bold(),
-                "- prints this help".italic()
-            );*/
-            println!();
+            displayinfo::usage();
 
             println!("Your journal for today: {}", today.bold());
             println!();
@@ -89,6 +78,12 @@ fn main() {
             }
         }
 
+        std::process::exit(exitcode::OK);
+    }
+
+    // Help
+    if args.action == bargs::BAction::Help {
+        displayinfo::help();
         std::process::exit(exitcode::OK);
     }
 

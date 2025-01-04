@@ -2,6 +2,12 @@
 
 A commnd line Bullet List tool
 
+## Installation
+
+```bash
+cargo install --locked bjourn
+```
+
 ## Features
 
 ### Add
