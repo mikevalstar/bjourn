@@ -107,6 +107,26 @@ fn main() {
         }
     }
 
+    // remove
+    if args.action == bargs::BAction::Remove {
+        let input = match &args.input {
+            Some(t) => t,
+            None => {
+                eprintln!("Error: remove requires a quickid");
+                std::process::exit(exitcode::USAGE);
+            }
+        };
+
+        if env_debug {
+            println!("Removing: {}", input);
+        }
+
+        if let Err(e) = db::remove_bullet(input) {
+            eprintln!("Error removing bullet: {}", e);
+            std::process::exit(exitcode::IOERR);
+        }
+    }
+
     // handle the list action
     if args.action == bargs::BAction::List {
         // read in the date as the second arg (if blank use today)
@@ -132,26 +152,6 @@ fn main() {
                 // for piping output
                 println!("* {}", bullet.text);
             }
-        }
-    }
-
-    // remove
-    if args.action == bargs::BAction::Remove {
-        let input = match &args.input {
-            Some(t) => t,
-            None => {
-                eprintln!("Error: remove requires a quickid");
-                std::process::exit(exitcode::USAGE);
-            }
-        };
-
-        if env_debug {
-            println!("Removing: {}", input);
-        }
-
-        if let Err(e) = db::remove_bullet(input) {
-            eprintln!("Error removing bullet: {}", e);
-            std::process::exit(exitcode::IOERR);
         }
     }
 
