@@ -27,9 +27,12 @@ ACTIONS:
                 Remove the entry with the given id
         -v, --version, version
                 Print the version of bjourn
+
+OPTIONS:
+        -o, --output [md, markdown, json]
 ```
 
-## Features
+## Actions
 
 ### Add
 
@@ -69,6 +72,29 @@ bjourn list | cat
 * added version 0.2.1 of bjourn
 ```
 
+### Remove
+
+Remove a bullet point by specifying the id
+
+```bash
+bjourn remove beWLHOFj
+```
+
+## Options
+
+### Output
+
+You can specify the output format of the list command by using the `-o` or `--output` flag
+
+```bash
+bjourn list 2025-01-04 -o json
+```
+
+## ENV variables
+
+`DEBUG` - Set to `true` to print debug messages
+`BJOURN_USAGE` - Set to `false` to print the "usage" message when running bjourn with no arguments
+
 ## Development Notes
 
 Run:
@@ -89,12 +115,7 @@ Debug Mode
 DEBUG=true cargo run
 ```
 
-## ENV variables
-
-`DEBUG` - Set to `true` to print debug messages
-`BJOURN_USAGE` - Set to `false` to print the usage message when running bjourn with no arguments
-
-## Installation (Local)
+### Installation (Local)
 
 ```bash
 cargo install --path .

@@ -56,4 +56,9 @@ pub fn help() {
 
     println!("{}", "\t-v, --version, version".green());
     println!("\t\tPrint the version of bjourn");
+
+    println!();
+
+    println!("{}", "OPTIONS:".yellow());
+    println!("{}", "\t-o, --output [md, markdown, json]".green());
 }
