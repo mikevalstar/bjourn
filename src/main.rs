@@ -9,6 +9,9 @@ mod db;
 #[path = "lib/displayinfo.rs"]
 mod displayinfo;
 
+#[path = "lib/displaylist.rs"]
+mod displaylist;
+
 use colored::Colorize;
 use std::io::IsTerminal;
 
@@ -69,24 +72,7 @@ fn main() {
             println!();
         }
 
-        let list = db::list_bullets(today);
-        if let Err(e) = list {
-            println!("Error listing bullets: {}", e);
-            std::process::exit(1);
-        }
-        for bullet in list.unwrap() {
-            if std::io::stdout().is_terminal() {
-                println!(
-                    "{} {}: {}",
-                    "*".bold(),
-                    bullet.quickid.magenta(),
-                    bullet.text
-                );
-            } else {
-                // for piping output
-                println!("* {}", bullet.text);
-            }
-        }
+        displaylist::displaylist(&args);
 
         std::process::exit(exitcode::OK);
     }
@@ -139,30 +125,7 @@ fn main() {
 
     // handle the list action
     if args.action == bargs::BAction::List {
-        // read in the date as the second arg (if blank use today)
-        let date = match args.input {
-            Some(ref d) => d,
-            None => &chrono::Local::now().format("%Y-%m-%d").to_string(),
-        };
-
-        let list = db::list_bullets(date);
-        if let Err(e) = list {
-            eprintln!("Error listing bullets: {}", e);
-            std::process::exit(exitcode::IOERR);
-        }
-        for bullet in list.unwrap() {
-            if std::io::stdout().is_terminal() {
-                println!(
-                    "{} {}: {}",
-                    "*".bold(),
-                    bullet.quickid.magenta(),
-                    bullet.text
-                );
-            } else {
-                // for piping output
-                println!("* {}", bullet.text);
-            }
-        }
+        displaylist::displaylist(&args);
     }
 
     std::process::exit(exitcode::OK);
