@@ -12,6 +12,8 @@ pub enum BAction {
     List,
     ListDefault, // when it's just the default no args passed
     Remove,
+    Help,
+    Version,
 }
 // a list of first arg options enum
 static GLOBAL_ACTIONS: [&str; 3] = ["add", "list", "remove"];
@@ -24,6 +26,11 @@ static GLOBAL_ACTION_ARGS_MAP: phf::Map<&'static str, BAction> = phf_map! {
     "list" => BAction::List,
     "r" => BAction::Remove,
     "remove" => BAction::Remove,
+    "h" => BAction::Help,
+    "help" => BAction::Help,
+    "v" => BAction::Version,
+    "version" => BAction::Version,
+    "V" => BAction::Version,
 };
 
 fn get_action_from_flag(flag: &str) -> Option<BAction> {
