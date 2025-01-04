@@ -192,9 +192,16 @@ impl BJournRunner for BArgs {
             }
         }
 
+        // default to add if we have input but no action
+        let action_default = match input.clone() {
+            Some(a) if a.is_empty() => BAction::Add,
+            Some(_) => BAction::ListDefault,
+            None => BAction::ListDefault,
+        };
+
         BArgs {
             args,
-            action: action.unwrap_or(BAction::Add), // default to add because we have some input
+            action: action.unwrap_or(action_default),
             flags,
             flag_args,
             input,
@@ -322,5 +329,32 @@ mod tests {
         );
         assert!(matches!(args6.action, BAction::Add));
         assert_eq!(args6.input.unwrap(), "This is stdin input this is"); // appends teh text
+    }
+
+    #[test]
+    fn test_option_inputs() {
+        let args1 = BArgs::parse(
+            vec![
+                "bjourn".to_string(),
+                "--output".to_string(),
+                "json".to_string(),
+                "this".to_string(),
+                "is".to_string(),
+                "a".to_string(),
+                "test".to_string(),
+            ],
+            None,
+        );
+        assert!(matches!(args1.action, BAction::Add));
+        assert_eq!(args1.input.clone().unwrap(), "this is a test");
+        assert_eq!(args1.flag_arg("output"), Some("json".to_string()));
+
+        let args2 = BArgs::parse(
+            vec!["bjourn".to_string(), "-o".to_string(), "json".to_string()],
+            None,
+        );
+        assert!(matches!(args2.action, BAction::ListDefault));
+        assert_eq!(args2.input, None);
+        assert_eq!(args2.flag_arg("output"), Some("json".to_string()));
     }
 }
