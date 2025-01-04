@@ -2,6 +2,7 @@ use crate::bargs;
 use crate::bargs::BJournRunner;
 use crate::db;
 use colored::Colorize;
+use serde_json::json;
 use std::io::IsTerminal;
 
 fn displaylist_md_row_terminal(itm: db::BItem) {
@@ -21,6 +22,20 @@ fn displaylist_md(list: Vec<db::BItem>) {
             displaylist_md_row(bullet);
         }
     }
+}
+
+fn displaylist_json(list: Vec<db::BItem>) {
+    let mut items = Vec::new();
+    for bullet in list {
+        items.push(json!({
+            "quickid": bullet.quickid,
+            "bullet": bullet.text,
+            "date": bullet.list_date,
+            "added": bullet.added,
+        }));
+    }
+
+    println!("{}", json!(items));
 }
 
 pub fn displaylist(args: &bargs::BArgs) {
@@ -44,6 +59,7 @@ pub fn displaylist(args: &bargs::BArgs) {
     match format.as_str() {
         "md" => displaylist_md(list.unwrap()),
         "markdown" => displaylist_md(list.unwrap()),
+        "json" => displaylist_json(list.unwrap()),
         _ => eprintln!("Unknown format: {}", format),
     }
 }

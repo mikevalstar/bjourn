@@ -6,9 +6,10 @@ Features and other TODO items for the project
 
 - [ ] List multiple days and ranges of days
 - [ ] Configure output format in config
-- [ ] Configure output format in command line e.g. markdown, json, etc.
+- [x] Configure output format in command line e.g. markdown, json, etc.
 - [ ] Config the output basic output format
 - [ ] find command
+- [ ] quick remove last item added
 
 ## Misc
 
