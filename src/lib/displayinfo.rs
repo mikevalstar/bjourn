@@ -60,5 +60,20 @@ pub fn help() {
     println!();
 
     println!("{}", "OPTIONS:".yellow());
+
     println!("{}", "\t-o, --output [md, markdown, json]".green());
+    println!("\t\tOutput format for the list action, defaults to markdown");
+
+    println!("{}", "\t-f, --format [format string]".green());
+    println!("\t\tFormat string for in the markdown output, defaults to '* {{bullet}}'");
+    println!("\t\t\t {{quickid}} - the quickid of the bullet");
+    println!("\t\t\t {{bullet}} - the text of the bullet");
+    println!("\t\t\t {{date}} - the date of the bullet - ISO 8601");
+    println!("\t\t\t {{added}} - the date & time the bullet was added - ISO 8601");
+    println!("\t\t\t {{yyyy}} - the year added");
+    println!("\t\t\t {{mm}} - the month added");
+    println!("\t\t\t {{dd}} - the day added");
+    println!("\t\t\t {{HH}} - the hour added");
+    println!("\t\t\t {{MM}} - the minute added");
+    println!("\t\t\t {{SS}} - the second added");
 }

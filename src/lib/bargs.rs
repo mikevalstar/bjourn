@@ -40,10 +40,12 @@ fn get_action_from_flag(flag: &str) -> Option<BAction> {
     GLOBAL_ACTION_ARGS_MAP.get(flag).cloned()
 }
 
-// flags map to options flag and wether or not it takes an argument
+// flags map to options flag and weather or not it takes an argument
 static GLOBAL_ACTION_FLAGS_MAP: phf::Map<&'static str, (&'static str, bool)> = phf_map! {
     "o" => ("output", true),
     "output" => ("output", true),
+    "f" => ("format", true),
+    "format" => ("format", true),
 };
 
 fn get_flag_from_flag(flag: &str) -> Option<(&str, bool)> {
@@ -138,6 +140,7 @@ impl BJournRunner for BArgs {
                     let mut ffound = false;
                     if let Some(a) = get_action_from_flag(&c.to_string()) {
                         action = Some(a);
+                        ffound = true;
                     }
 
                     if let Some((flag_item, takes_arg)) = get_flag_from_flag(&c.to_string()) {
